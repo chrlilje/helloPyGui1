@@ -1,33 +1,75 @@
 import tkinter as tk
 from . import styles
 
-class NumberBox(tk.Frame):
-    def __init__(self, parent:tk.Widget, title:str,value:float=0,precision:int = 1, unit:str = ""):
-        super().__init__(parent)
-        self.title = title
-        self.value = value
-        self.precision = precision
-        self.unit = unit
 
-        # Title of the box. implement layout later
+class NumberBox(tk.Frame):
+    """
+    A display widget that shows a titled numeric value with a unit.
+
+    Layout (top to bottom, all centred):
+        title  – small label
+        value  – large number, grows with the box
+        unit   – small label
+    """
+
+    def __init__(self, parent: tk.Widget, title: str, value: float = 0,
+                 precision: int = 1, unit: str = ""):
+        super().__init__(parent, bg=styles.BOX_BACKGROUND)
+
+        # Keep precision so update_value can format correctly
+        self.precision = precision
+
+        p = styles.BOX_INNER_PADDING   # shorthand for less repetition below
+
+        # ── Row 0: title ──────────────────────────────────────────────────────
         self.label_title = tk.Label(
-            self,text=self.title,
+            self,
+            text=title,
+            font=styles.FONT_TITLE,
+            bg=styles.BOX_BACKGROUND,
+            fg=styles.FOREGROUND,
+        )
+        self.label_title.grid(
+            row=0, column=0, sticky="ew",
+            padx=p, pady=(p, 0)
         )
 
-        # value of the number - use update_value to format value correctly
+        # ── Row 1: value ──────────────────────────────────────────────────────
         self.label_value = tk.Label(
             self,
+            font=styles.FONT_VALUE,
+            bg=styles.BOX_BACKGROUND,
+            fg=styles.ACCENT,
         )
-        self.update_value(self.value)
+        self.label_value.grid(
+            row=1, column=0, sticky="nsew",
+            padx=p
+        )
 
-        # Place content right
-        self.label_title.pack()
-        self.label_value.pack()
-        
+        # ── Row 2: unit ───────────────────────────────────────────────────────
+        self.label_unit = tk.Label(
+            self,
+            text=unit,
+            font=styles.FONT_UNIT,
+            bg=styles.BOX_BACKGROUND,
+            fg=styles.FOREGROUND,
+        )
+        self.label_unit.grid(
+            row=2, column=0, sticky="ew",
+            padx=p, pady=(0, p)
+        )
 
-    def update_value(self,new_value:float):
+        # Let row 1 (the value row) absorb all extra vertical space when the
+        # box is resized, so the number stays visually centred between title
+        # and unit.
+        self.rowconfigure(1, weight=1)
+        self.columnconfigure(0, weight=1)
+
+        # Render the initial value
+        self.update_value(value)
+
+    def update_value(self, new_value: float):
         self.value = new_value
-        formatted = f"{self.value:.{self.precision}f}"
-        self.label_value.config(text=formatted)
+        self.label_value.config(text=f"{self.value:.{self.precision}f}")
 
 

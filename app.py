@@ -3,6 +3,7 @@ import tkinter as tk
 import threading
 import queue
 from ui.components import NumberBox
+from ui import styles
 import data_io  # this is the module that fetch our data
 
 # main app class
@@ -11,18 +12,41 @@ class App:
         # initialize app
         self.root = tk.Tk()
         self.root.title("Boxes and numbers")
-        self.root.geometry("800x600")
+        self.root.configure(bg=styles.BACKGROUND)
+
+        # Size the window to 50 % of the screen, then centre it
+        screen_w = self.root.winfo_screenwidth()
+        screen_h = self.root.winfo_screenheight()
+        win_w    = screen_w // 2
+        win_h    = screen_h // 2
+        offset_x = (screen_w - win_w) // 2
+        offset_y = (screen_h - win_h) // 2
+        self.root.geometry(f"{win_w}x{win_h}+{offset_x}+{offset_y}")
+
+        # Tell tkinter's grid that both columns share the available width equally,
+        # and that the single row may grow to fill the window height.
+        # weight=1 means: give all available extra space to this column/row.
+        # uniform="boxes" forces both columns to always stay the same width,
+        # so a wider value in one box cannot steal space from the other.
+        self.root.columnconfigure(0, weight=1, uniform="boxes")
+        self.root.columnconfigure(1, weight=1, uniform="boxes")
+        self.root.rowconfigure(0, weight=1)
 
         # Create a Queue for thread safe data communication with the serial-thingy
-        self.data_queue : queue.Queue = queue.Queue()
+        self.data_queue: queue.Queue = queue.Queue()
 
         # Make the boxes - User interface
-        self.speedBox = NumberBox(self.root,"Speed",23,2,"mm/s")
-        self.rpmBox = NumberBox(self.root,"RPM",123,1,"rpm")
+        self.speedBox = NumberBox(self.root, "Speed", 23,  2, "mm/s")
+        self.rpmBox   = NumberBox(self.root, "RPM",   123, 1, "rpm")
 
         # Place the boxes
-        self.speedBox.grid(row=0, column=0, padx=20, pady=20)
-        self.rpmBox.grid(row=0, column=1 , padx=20, pady=20)
+        # sticky="nsew" makes each box stretch to fill its entire grid cell.
+        # The inner edges use BOX_GAP so there is more breathing room between
+        # the two boxes than between a box and the window edge.
+        outer = styles.BOX_OUTER_PADDING
+        gap   = styles.BOX_GAP
+        self.speedBox.grid(row=0, column=0, padx=(outer, gap), pady=outer, sticky="nsew")
+        self.rpmBox.grid(  row=0, column=1, padx=(gap, outer), pady=outer, sticky="nsew")
     
     def update_loop(self):
 
