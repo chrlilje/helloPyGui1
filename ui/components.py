@@ -73,3 +73,29 @@ class NumberBox(tk.Frame):
         self.label_value.config(text=f"{self.value:.{self.precision}f}")
 
 
+class StatusLabel(tk.Frame):
+    """
+    A simple status line component for short messages.
+
+    Designed to sit under the NumberBox widgets and span both columns.
+    """
+
+    def __init__(self, parent: tk.Widget, text: str = ""):
+        super().__init__(parent, bg=styles.BACKGROUND)
+
+        self.label = tk.Label(
+            self,
+            text=text,
+            font=styles.FONT_UNIT,
+            bg=styles.BACKGROUND,
+            fg=styles.FOREGROUND,
+            anchor="w",
+        )
+        self.label.grid(row=0, column=0, sticky="ew")
+
+        self.columnconfigure(0, weight=1)
+
+    def update_text(self, text: str):
+        self.label.config(text=text)
+
+

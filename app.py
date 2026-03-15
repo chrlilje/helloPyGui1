@@ -2,7 +2,7 @@
 import tkinter as tk
 import threading
 import queue
-from ui.components import NumberBox
+from ui.components import NumberBox, StatusLabel
 from ui import styles
 import data_io  # this is the module that fetch our data
 
@@ -13,6 +13,7 @@ class App:
         self.root = tk.Tk()
         self.root.title("Boxes and numbers")
         self.root.configure(bg=styles.BACKGROUND)
+        self.status_text:str = ""
 
         # Size the window to 50 % of the screen, then centre it
         screen_w = self.root.winfo_screenwidth()
@@ -38,6 +39,7 @@ class App:
         # Make the boxes - User interface
         self.speedBox = NumberBox(self.root, "Speed", 23,  2, "mm/s")
         self.rpmBox   = NumberBox(self.root, "RPM",   123, 1, "rpm")
+        self.statusLabel = StatusLabel(self.root, self.status_text)
 
         # Place the boxes
         # sticky="nsew" makes each box stretch to fill its entire grid cell.
@@ -47,6 +49,14 @@ class App:
         gap   = styles.BOX_GAP
         self.speedBox.grid(row=0, column=0, padx=(outer, gap), pady=outer, sticky="nsew")
         self.rpmBox.grid(  row=0, column=1, padx=(gap, outer), pady=outer, sticky="nsew")
+        self.statusLabel.grid(row=1, column=0, columnspan=2, padx=outer, pady=(0, outer), sticky="ew")
+
+        # Keep model text and UI label in sync from one place
+        self.set_status_text("Status: Ready")
+
+    def set_status_text(self, text: str):
+        self.status_text = text
+        self.statusLabel.update_text(self.status_text)
     
     def update_loop(self):
 
@@ -67,6 +77,8 @@ class App:
                 self.speedBox.update_value(latest_data["speed"])
             if "rpm" in latest_data:
                 self.rpmBox.update_value(latest_data["rpm"])
+            if "status" in latest_data:
+                self.set_status_text(latest_data["status"])
         
         # schedule the next run of the check for updates in 100ms
         self.root.after(100, self.update_loop)
