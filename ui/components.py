@@ -5,7 +5,8 @@ from . import styles
 class NumberBox(tk.Frame):
     """
     A display widget that shows a titled numeric value with a unit.
-
+    Inherits from the tkinder.Frame class
+    
     Layout (top to bottom, all centred):
         title  – small label
         value  – large number, grows with the box
