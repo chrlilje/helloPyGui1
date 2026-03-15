@@ -37,7 +37,7 @@ class App:
                 # Safe way to handle if the queue was emptied somewhere else for some reason
                 break # break from the 'while not self.data_queue.empty()'
 
-        if latest_data:
+        if latest_data is not None:
             # keys match what data_io.py sends into the queue
             if "speed" in latest_data:
                 self.speedBox.update_value(latest_data["speed"])
